@@ -108,7 +108,6 @@ internal sealed class TrayApplicationContext : ApplicationContext
 
     private AppSettings _settings;
     private SettingsForm? _settingsForm;
-    private bool _updatingMenu;
 
     public TrayApplicationContext()
     {
@@ -128,8 +127,8 @@ internal sealed class TrayApplicationContext : ApplicationContext
             null,
             (_, _) => OpenSettings()
         );
-        _updateItem = new ToolStripMenuItem { Visible = false };
 
+        _updateItem = new ToolStripMenuItem { Visible = false };
         _updateItem.Click += (_, _) => OpenLatestRelease();
 
         _hotkeyLabel = new ToolStripMenuItem { Enabled = false };
@@ -161,11 +160,6 @@ internal sealed class TrayApplicationContext : ApplicationContext
         };
         _notifyIcon.DoubleClick += (_, _) => OpenSettings();
 
-        _updateCheckTimer = new System.Windows.Forms.Timer { Interval = 4000 };
-
-        _updateCheckTimer.Tick += CheckForUpdates;
-        _updateCheckTimer.Start();
-
         // 汉化版改进：创建命名事件（供第二实例触发"打开设置"），
         // UI 线程定时器检查信号后直接弹设置窗口，避免后台线程/广播消息不可靠
         _showSettingsEvent = new EventWaitHandle(
@@ -195,6 +189,10 @@ internal sealed class TrayApplicationContext : ApplicationContext
         _pinMaintainTimer = new System.Windows.Forms.Timer { Interval = 500 };
         _pinMaintainTimer.Tick += (_, _) => WindowPinning.MaintainPinnedTop();
         _pinMaintainTimer.Start();
+
+        _updateCheckTimer = new System.Windows.Forms.Timer { Interval = 4000 };
+        _updateCheckTimer.Tick += CheckForUpdates;
+        _updateCheckTimer.Start();
 
         _pinController = new PinController(_settings, ShowResult);
 
@@ -364,39 +362,30 @@ internal sealed class TrayApplicationContext : ApplicationContext
 
     private void UpdateMenuFromSettings()
     {
-        _updatingMenu = true;
+        _toggleWindowItem.Text = AppLocalization.Text(
+            "Закрепить/открепить активное окно",
+            "Pin/unpin active window"
+        );
 
-        try
+        _settingsItem.Text = AppLocalization.Text("Настройки…", "Settings…");
+
+        if (!string.IsNullOrWhiteSpace(_latestVersionText))
         {
-            _toggleWindowItem.Text = AppLocalization.Text(
-                "Закрепить/открепить активное окно",
-                "Pin/unpin active window"
+            _updateItem.Text = AppLocalization.Text(
+                $"Скачать обновление v{_latestVersionText}",
+                $"Download update v{_latestVersionText}"
             );
-
-            _settingsItem.Text = AppLocalization.Text("Настройки…", "Settings…");
-
-            if (!string.IsNullOrWhiteSpace(_latestVersionText))
-            {
-                _updateItem.Text = AppLocalization.Text(
-                    $"Скачать обновление v{_latestVersionText}",
-                    $"Download update v{_latestVersionText}"
-                );
-            }
-
-            _exitItem.Text = AppLocalization.Text("Выход", "Exit");
-
-            _notifyIcon.Text = AppLocalization.Text(
-                "PinWindow — закрепление окон",
-                "PinWindow — always on top"
-            );
-            _hotkeyLabel.Text =
-                $"{AppLocalization.Text("Горячая клавиша", "Hotkey")}: "
-                + _settings.GetHotkey().DisplayText;
         }
-        finally
-        {
-            _updatingMenu = false;
-        }
+
+        _exitItem.Text = AppLocalization.Text("Выход", "Exit");
+
+        _notifyIcon.Text = AppLocalization.Text(
+            "PinWindow — закрепление окон",
+            "PinWindow — always on top"
+        );
+        _hotkeyLabel.Text =
+            $"{AppLocalization.Text("Горячая клавиша", "Hotkey")}: "
+            + _settings.GetHotkey().DisplayText;
     }
 
     private void ShowResult(ToggleResult result)

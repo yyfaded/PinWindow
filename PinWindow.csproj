@@ -8,7 +8,7 @@
     <AssemblyName>PinWindow</AssemblyName>
     <RootNamespace>PinWindow</RootNamespace>
     <ApplicationIcon>PinWindow.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>yyfaded</Authors>
     <Description>窗口一键置顶工具：右键窗口右上角按钮区域即可置顶。基于 helliong/PinWindow 的简体中文汉化二创版。</Description>
   </PropertyGroup>

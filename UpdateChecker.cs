@@ -5,7 +5,7 @@ internal sealed record UpdateInfo(Version Version, string ReleaseUrl);
 internal static class UpdateChecker
 {
     private const string LatestReleasePageUrl =
-        "https://github.com/helliong/pinWindow/releases/latest";
+        "https://github.com/yyfaded/PinWindow/releases/latest";
 
     private static readonly HttpClient Client = CreateClient();
 
@@ -55,7 +55,7 @@ internal static class UpdateChecker
         }
         catch
         {
-            // Ошибка сети не должна мешать работе PinWindow.
+            // 网络错误不应影响 PinWindow 正常运行
             return null;
         }
     }
